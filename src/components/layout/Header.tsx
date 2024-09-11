@@ -1,3 +1,5 @@
+"use client";
+
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 import { ThemeSwitcherComponent } from "../common/ThemeSwitcher";
 import Link from "next/link";
@@ -10,13 +12,23 @@ export default function HeaderComponent() {
         <StoreIcon className="size-6 text-primary" />
         Fake Store
       </Link>
-      <div className="flex items-center flex-1 gap-2">
-        <Link href={"/products"}>
-          <ListIcon />
-        </Link>
-        <Link href={"/products/create"}>
-          <PlusCircleIcon />
-        </Link>
+      <div className="flex items-center flex-1 gap-4">
+        <SignedIn>
+          <Link
+            className="flex items-center gap-2 text-foreground/60 transition-colors hover:text-foreground"
+            href={"/products"}
+          >
+            <ListIcon />
+            <span className="hidden sm:block">Products</span>
+          </Link>
+          <Link
+            className="flex items-center gap-2 text-foreground/60 transition-colors hover:text-foreground"
+            href={"/products/create"}
+          >
+            <PlusCircleIcon />
+            <span className="hidden sm:block">Add Product</span>
+          </Link>
+        </SignedIn>
       </div>
       <ThemeSwitcherComponent />
       <SignedOut>
