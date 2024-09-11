@@ -1,4 +1,5 @@
 import { ClerkProvider } from "@clerk/nextjs";
+import { ThemeProvider } from "next-themes";
 import { ReactNode } from "react";
 
 interface IRootProvider {
@@ -7,5 +8,16 @@ interface IRootProvider {
 
 export default function RootProvider(props: IRootProvider) {
   const { children } = props;
-  return <ClerkProvider>{children}</ClerkProvider>;
+  return (
+    <ClerkProvider>
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="system"
+        enableSystem
+        disableTransitionOnChange
+      >
+        {children}
+      </ThemeProvider>
+    </ClerkProvider>
+  );
 }
