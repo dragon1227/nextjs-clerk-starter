@@ -6,5 +6,5 @@ interface IRootLayoutComponentProps {
 
 export default function RootLayoutComponent(props: IRootLayoutComponentProps) {
   const { children } = props;
-  return children;
+  return <div className="w-full overflow-x-hidden relative">{children}</div>;
 }
