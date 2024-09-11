@@ -1,28 +1,21 @@
 "use client";
 
-import { SubmitHandler, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { TProduct, TProductUpdate, ZProductUpdate } from "@/types/product";
+import { TProduct } from "@/types/product";
 import { useGetProducts } from "@/hooks/use-product";
 import { toast } from "sonner";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useQueryClient } from "@tanstack/react-query";
 import { notFound, useRouter } from "next/navigation";
-import { RefreshCwIcon } from "lucide-react";
+import { ChevronLeftIcon, DollarSignIcon, RefreshCwIcon } from "lucide-react";
 import { QUERY_KEYS } from "@/config/const";
-import {
-  MouseEvent,
-  useCallback,
-  useEffect,
-  useMemo,
-  useTransition,
-} from "react";
+import { MouseEvent, useCallback, useMemo, useTransition } from "react";
 import { Spinner } from "@/components/common/Spinner";
+import Image from "next/image";
+import Link from "next/link";
 
 export default function ProductEditPage(props: { params: { id: string } }) {
   const id = props.params.id;
-  const { data: products, isPending } = useGetProducts();
+  const { data: products, isPending, refetch } = useGetProducts();
   const [isUpdating, startUpdating] = useTransition();
   const product = useMemo(() => {
     if (isPending) return undefined;
@@ -32,60 +25,7 @@ export default function ProductEditPage(props: { params: { id: string } }) {
     );
   }, [isPending, products, id]);
   const router = useRouter();
-  const {
-    handleSubmit,
-    register,
-    setValue,
-    reset: resetForm,
-    formState: { errors, isValid },
-  } = useForm<TProductUpdate>({
-    mode: "onChange",
-    resolver: zodResolver(ZProductUpdate),
-    defaultValues: {
-      image: product?.image,
-      category: product?.category,
-      price: product?.price,
-      description: product?.description,
-      id: id ? parseInt(id) : undefined,
-      title: product?.title,
-    },
-  });
-  const reset = useCallback(() => {
-    if (product) {
-      setValue("id", product.id);
-      setValue("category", product.category);
-      setValue("title", product.title);
-      setValue("description", product.description);
-      setValue("image", product.image);
-      setValue("title", product.title);
-      setValue("price", product.price);
-    } else {
-      resetForm();
-    }
-  }, [product, setValue, resetForm]);
-  useEffect(() => {
-    reset();
-  }, [reset]);
   const queryClient = useQueryClient();
-  const onSubmit: SubmitHandler<TProductUpdate> = useCallback(
-    (data) => {
-      startUpdating(() => {
-        router.replace("/products");
-        queryClient.setQueryData(
-          [QUERY_KEYS.products],
-          (prevData: TProduct[] | undefined) => {
-            if (prevData)
-              return prevData.map((item) =>
-                item.id === data.id ? { ...item, ...data } : item
-              );
-            else return [data];
-          }
-        );
-        toast.success("Successfully updated");
-      });
-    },
-    [router, queryClient]
-  );
   const onDelete = useCallback(
     (event: MouseEvent<HTMLButtonElement>) => {
       event.stopPropagation();
@@ -107,55 +47,58 @@ export default function ProductEditPage(props: { params: { id: string } }) {
   );
   if (isPending) return <Spinner />;
   else if (!product && !isUpdating) return notFound();
+  else if (!product) return null;
   else
     return (
       <div className="relative flex flex-col justify-center p-2 container mx-auto gap-4">
-        <div className="flex items-center gap-4">
-          <div className="text-xl font-bold">Edit Product</div>
-          <Button
-            size="icon"
-            onClick={() => reset()}
-            className="size-8 rounded-full"
-            variant="outline"
-          >
-            <RefreshCwIcon className="size-4" />
-          </Button>
+        <div className="flex flex-wrap gap-4">
+          <div className="w-48 max-w-full rounded-xl overflow-hidden group">
+            <Image
+              src={product.image}
+              alt={product.title}
+              width={192}
+              height={300}
+              className="object-cover"
+            />
+          </div>
+          <div className="h-fit flex-1 relative">
+            <div className="flex items-center gap-4">
+              <Link passHref href="/products">
+                <Button
+                  size="icon"
+                  className="size-8 rounded-full"
+                  variant="outline"
+                >
+                  <ChevronLeftIcon className="size-4" />
+                </Button>
+              </Link>
+              <div className="text-xl font-bold">{product?.title}</div>
+              <Button
+                size="icon"
+                onClick={() => refetch()}
+                className="size-8 rounded-full"
+                variant="outline"
+              >
+                <RefreshCwIcon className="size-4" />
+              </Button>
+            </div>
+            <div className="flex items-center text-2xl">
+              <DollarSignIcon className="size-8" />
+              {product.price}
+            </div>
+            <p className="w-full break-before-all">{product.description}</p>
+          </div>
         </div>
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="flex flex-col gap-4 relative"
-        >
-          <Input {...register("title")} placeholder="Title" />
-          {errors["title"] ? (
-            <div className="text-destructive text-sm">
-              {errors.title.message}
-            </div>
-          ) : null}
-          <Input {...register("category")} placeholder="Category" />
-          {errors["category"] ? (
-            <div className="text-destructive text-sm">
-              {errors.category.message}
-            </div>
-          ) : null}
-          <Input {...register("description")} placeholder="Description" />
-          {errors["description"] ? (
-            <div className="text-destructive text-sm">
-              {errors.description.message}
-            </div>
-          ) : null}
-          <Input {...register("price")} placeholder="Price" />
-          {errors["price"] ? (
-            <div className="text-destructive text-sm">
-              {errors.price.message}
-            </div>
-          ) : null}
+        <div>
           <div className="w-full relative flex items-center justify-end gap-2">
             <Button
-              type="submit"
-              disabled={!isValid || isPending}
+              onClick={() => {
+                router.push(`/products/${id}/edit`);
+              }}
+              disabled={isPending}
               variant="default"
             >
-              Submit
+              Edit
             </Button>
             <Button
               onClick={onDelete}
@@ -165,7 +108,7 @@ export default function ProductEditPage(props: { params: { id: string } }) {
               Delete
             </Button>
           </div>
-        </form>
+        </div>
       </div>
     );
 }

@@ -5,7 +5,7 @@ import ProductItemComponent, {
 } from "@/components/common/product/ProductItem";
 import { Button } from "@/components/ui/button";
 import { useGetProducts } from "@/hooks/use-product";
-import { RefreshCwIcon } from "lucide-react";
+import { PlusIcon, RefreshCwIcon } from "lucide-react";
 import Link from "next/link";
 
 export default function ProductsHomePage() {
@@ -14,6 +14,11 @@ export default function ProductsHomePage() {
     <div className="container mx-auto relative">
       <div className="flex items-center gap-4">
         <div className="text-xl font-bold">Products</div>
+        <Link passHref href="/products/create">
+          <Button size="icon" className="size-8 rounded-full" variant="outline">
+            <PlusIcon className="size-4" />
+          </Button>
+        </Link>
         <Button
           size="icon"
           onClick={() => refetch()}

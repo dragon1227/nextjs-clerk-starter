@@ -9,8 +9,9 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { RefreshCwIcon } from "lucide-react";
+import { ChevronLeftIcon, RefreshCwIcon } from "lucide-react";
 import { QUERY_KEYS } from "@/config/const";
+import Link from "next/link";
 
 export default function ProductCreatePage() {
   const router = useRouter();
@@ -51,7 +52,12 @@ export default function ProductCreatePage() {
   return (
     <div className="relative flex flex-col justify-center p-2 container mx-auto gap-4">
       <div className="flex items-center gap-4">
-        <div className="text-xl font-bold">Products</div>
+        <Link passHref href="/products">
+          <Button size="icon" className="size-8 rounded-full" variant="outline">
+            <ChevronLeftIcon className="size-4" />
+          </Button>
+        </Link>
+        <div className="text-xl font-bold">Add New Product</div>
         <Button
           size="icon"
           onClick={() => reset()}
